@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Enums;
+
+enum TaskStatus: string
+{
+    case Pending = 'pending';
+    case Completed = 'completed';
+    case InProgress = 'inProgress';
+    
+    public function options(){	
+	   $options = [];
+	   foreach($this->cases() as $case){
+		 $options[$case->value] = $case->label();
+	   }
+	   return $options;	
+	}
+	
+	public function label(){
+	  return match($this){
+	    self::Pending => 'Pending',
+	    self::Completed => 'Completed',
+	    self::InProgress => 'In Progress'	  
+	  };
+	}
+	
+    public function color(){
+	  return match($this){
+	    self::Pending => 'gray',
+	    self::InProgress => 'yellow'	
+	    self::Completed => 'green',
+	      
+	  };
+	}
+	
+	public function transitions(){
+	  return match($this){
+	    self::Pending => [self::InProgress->value => self::InProgress->color()],
+	    self::InProgress => [self::Completed->value => self::Completed->color()],
+	    self::Completed => [],
+	    	  
+	  };
+	}
+	
+}
