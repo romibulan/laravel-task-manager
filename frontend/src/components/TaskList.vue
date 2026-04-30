@@ -132,16 +132,15 @@
               <td class="w-40 px-4 py-2 border">{{ task?.owner?.name }}</td>
               <td class="w-40 px-4 py-2 border">{{ task.due_date }}</td>
               <td class="w-40 px-4 py-2 border">
-                <div
-                  class="px-3 py-1 text-sm text-center font-medium rounded-full"
-                  :class="{
-                    'bg-green-200 text-green-700': task.extra.data.color === 'green',
-                    'bg-yellow-200 text-yellow-700': task.extra.data.color === 'yellow',
-                    'bg-gray-200 text-gray-700': task.extra.data.color === 'gray',
+                <Chip
+                  :label="task.extra.data.label"
+                  :icon="iconClass(task.extra.data.color)"
+                  :pt="{
+                    root: rootClass(task.extra.data.color),
+                    label: labelClass(task.extra.data.color),
+                    icon: iconStyle(task.extra.data.color),
                   }"
-                >
-                  {{ task.extra.data.label }}
-                </div>
+                />
               </td>
               <td class="px-4 py-2 border">
                 <div
@@ -150,15 +149,16 @@
                 >
                   <button
                     @click="updateStatus(task.id, transition.value)"
-                    class="px-3 py-1 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                    class="flex items-center space-x-1 px-2 py-1 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-shadow"
                     :class="{
-                      'bg-green-100 text-gray-700 hover:bg-green-200':
+                      'bg-green-100 tex t-gray-700 hover:bg-green-200':
                         transition.color === 'green',
                       'bg-yellow-100 text-gray-700 hover:bg-yellow-200':
                         transition.color === 'yellow',
                     }"
                   >
-                    <span>{{ transition.label }}</span>
+                    <i :class="updateIconClass(transition.value)" aria-hidden="true"></i
+                    ><span>{{ transition.label }}</span>
                   </button>
                 </div>
               </td>
@@ -200,6 +200,7 @@ import { TailwindPagination } from "laravel-vue-pagination";
 import Button from "PrimeVue/Button";
 import MultiSelect from "primevue/multiselect";
 import RadioButton from "primevue/radiobutton";
+import Chip from "primevue/chip";
 import { format, parse } from "@formkit/tempo";
 
 import { ref, onMounted, computed, watch } from "vue";
@@ -398,6 +399,59 @@ function getTasks(page = 1) {
       hideLoader();
     });
 }
+
+function rootClass(status) {
+  return {
+    class:
+      status === "green"
+        ? "border border-green-500"
+        : status === "yellow"
+        ? "border border-orange-500"
+        : "border bg-gray-500",
+  };
+}
+
+function labelClass(status) {
+  return {
+    class:
+      status === "green"
+        ? "text-green-800 italic"
+        : status === "yellow"
+        ? "text-orange-800 italic"
+        : "text-gray-800 italic",
+  };
+}
+
+function iconStyle(status) {
+  return {
+    style:
+      status === "green"
+        ? "color: green"
+        : status === "yellow"
+        ? "color: orange"
+        : "color: gray",
+  };
+}
+
+const iconClass = function (status) {
+  return status === "green"
+    ? "pi pi-check-circle"
+    : status === "yellow"
+    ? "pi pi-cog"
+    : "pi pi-clock";
+};
+
+function updateIconClass(status) {
+  return status === "pending"
+    ? "fa fa-thin fa-clock-o"
+    : status === "in_progress"
+    ? "fa fa-thin fa-gear"
+    : "fa fa-thin fa-check-circle";
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.orange-chip :deep(.p-chip) {
+  background-color: #ffd8b0 !important;
+}
+</style>
