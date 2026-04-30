@@ -1,0 +1,43 @@
+import axios from 'axios';
+import router from "../router";
+import { useHttpConfig } from '@/utils/library.js';
+
+axios.defaults.baseURL = 'http://localhost:8000/api'; // Set your backend URL here
+axios.defaults.withCredentials = true; // Required for sending cookies
+axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.interceptors.request.use(config => {
+  console.log('Request URL:', config.url);
+
+  if (config.url === '/sanctum/csrf-cookie') {
+    console.log('Setting baseURL for Sanctum CSRF request');
+    const newBase = 'http://localhost:8000';
+    // Ensure the URL is not already absolute before prepending
+    if (!config.url.startsWith('http')) {
+      config.url = `${newBase}${config.url}`;
+    }
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
+
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (!error.response) {
+      // We have a network error
+      console.error('Network error:', error);
+      console.error('Network error cause:', error.message);
+      console.error('Network error status code:', error.code);
+    }
+    else if (error.response && error.response.status === 401) {
+      const { syncUnAuthState } = useHttpConfig();
+      syncUnAuthState();
+      router.push("/login");
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default axios;

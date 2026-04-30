@@ -1,0 +1,54 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+@import 'primeicons/primeicons.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.icon::before {
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  /* Step 1: Define icon variables */
+  --icon-user: "\f007";
+  --icon-trash: "\f1f8";
+}
+
+[data-icon="user"] {
+  --dynamic-icon: "\f007";
+}
+
+/* Custom styles */
+div.header {
+  position: relative;
+  max-width: 100%;
+  display: inline-block;
+
+}
+
+div.header h2::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 2px;
+  background-color: #4A90E2;
+  /* Accent color */
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+
+}
+
+button.icon span::before {
+  font-family: "FontAwesome";
+  /* Use "FontAwesome" for v4.7 */
+  font-weight: 900;
+  /* Required for Solid icons in v5+ */
+  content: var(--dynamic-icon);
+  /* Unicode for the 'user' icon */
+  margin-right: 4px;
+}
