@@ -11,15 +11,7 @@
   <!-- end task form -->
   <div class="max-w-7xl mx-auto mt-10">
     <h3 class="text-2xl font-semibold mb-4">Your Tasks</h3>
-    <div class="mb-8 flex justify-end items-center gap-4">
-      <Button @click="showDialog()" label="New Task" icon="pi pi-plus" />
-      <Button
-        @click="getTasks()"
-        label="Refresh"
-        icon="pi pi-refresh"
-        severity="secondary"
-      />
-    </div>
+
     <div
       v-if="isLoading"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-10 backdrop-blur-sm"
@@ -76,8 +68,8 @@
         <!-- end search input >
 
         <!-- Due Date Filter -->
-
-        <div class="flex flex-wrap gap-4 mb-5">
+        <div class="flex flex-wrap gap-6 mb-5">
+          <span class="text-sm font-medium">Due date: </span>
           <div class="flex items-center">
             <RadioButton v-model="filterDate" inputId="all" value="all" />
             <label for="all" class="ml-2">All</label>
@@ -105,90 +97,116 @@
         />
         <!-- end status filter -->
       </div>
-
-      <!-- Tasks Table -->
-      <div v-if="filteredItems.length > 0">
-        <table class="m-auto table-auto w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2 border">Task</th>
-              <th class="px-4 py-2 border">Creator</th>
-              <th class="px-4 py-2 border">Due Date</th>
-              <th class="px-4 py-2 border">Status</th>
-              <th class="px-4 py-2 border">Update Status</th>
-              <th class="px-4 py-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="task in filteredItems"
-              :key="task.id"
-              :class="{
-                'bg-green-100': highlighted === task.id && statusColor === 'green',
-                'bg-yellow-100': highlighted === task.id && statusColor === 'yellow',
-              }"
-            >
-              <td class="px-4 py-2 border">{{ task.title }}</td>
-              <td class="w-40 px-4 py-2 border">{{ task?.owner?.name }}</td>
-              <td class="w-40 px-4 py-2 border">{{ task.due_date }}</td>
-              <td class="w-40 px-4 py-2 border">
-                <Chip
-                  :label="task.extra.data.label"
-                  :icon="iconClass(task.extra.data.color)"
-                  :pt="{
-                    root: rootClass(task.extra.data.color),
-                    label: labelClass(task.extra.data.color),
-                    icon: iconStyle(task.extra.data.color),
-                  }"
-                />
-              </td>
-              <td class="px-4 py-2 border">
-                <div
-                  class="flex flex-col space-y-2"
-                  v-for="transition in task.extra.data.transitions"
-                >
-                  <button
-                    @click="updateStatus(task.id, transition.value)"
-                    class="flex items-center space-x-1 px-2 py-1 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                    :class="{
-                      'bg-green-100 tex t-gray-700 hover:bg-green-200':
-                        transition.color === 'green',
-                      'bg-yellow-100 text-gray-700 hover:bg-yellow-200':
-                        transition.color === 'yellow',
-                    }"
-                  >
-                    <i :class="updateIconClass(transition.value)" aria-hidden="true"></i
-                    ><span>{{ transition.label }}</span>
-                  </button>
-                </div>
-              </td>
-              <td class="px-4 py-2 border flex items-center space-x-2">
-                <Button
-                  icon="pi pi-pencil"
-                  severity="warning"
-                  @click="handleEdit(task.id)"
-                  label="Edit"
-                />
-                <Button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  @click="deleteTask(task.id)"
-                  label="Delete"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="mt-4">
-          <tailwind-pagination
-            :data="pages"
-            :limit="3"
-            @pagination-change-page="getTasks"
+      <div class="mb-4 flex justify-between items-center">
+        <span class="text-sm font-medium"
+          >Showing {{ filteredItems.length }} of {{ tasks.length }} tasks</span
+        >
+        <div v-if="filterStatus.length > 0" class="ml-12 flex items-center space-x-2">
+          <span class="text-sm font-medium">Status: </span>
+          <div v-for="filter in filterStatus" :key="filter">
+            <Chip
+              :label="statusFilterOptions.find((option) => option.code === filter)?.name"
+              :icon="iconClass(filter)"
+              removable
+              @remove="filterStatus = filterStatus.filter((f) => f !== filter)"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <Button @click="showDialog()" label="New Task" icon="pi pi-plus" />
+          <Button
+            @click="getTasks()"
+            label="Refresh"
+            icon="pi pi-refresh"
+            severity="secondary"
           />
         </div>
       </div>
-      <div v-else>No Tasks Found!</div>
-      <!-- End tasks table -->
+      <div class="overflow-x-auto">
+        <!-- Tasks Table -->
+        <div v-if="filteredItems.length > 0">
+          <table class="m-auto table-auto w-full">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border">Task</th>
+                <th class="px-4 py-2 border">Creator</th>
+                <th class="px-4 py-2 border">Due Date</th>
+                <th class="px-4 py-2 border">Status</th>
+                <th class="px-4 py-2 border">Update Status</th>
+                <th class="px-4 py-2 border">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="task in filteredItems"
+                :key="task.id"
+                :class="{
+                  'bg-green-100': highlighted === task.id && statusColor === 'green',
+                  'bg-yellow-100': highlighted === task.id && statusColor === 'yellow',
+                }"
+              >
+                <td class="px-4 py-2 border">{{ task.title }}</td>
+                <td class="w-40 px-4 py-2 border">{{ task?.owner?.name }}</td>
+                <td class="w-40 px-4 py-2 border">{{ task.due_date }}</td>
+                <td class="w-40 px-4 py-2 border">
+                  <Chip
+                    :label="task.extra.data.label"
+                    :icon="iconClass(task.status)"
+                    :pt="{
+                      root: rootClass(task.status),
+                      label: labelClass(task.status),
+                      icon: iconStyle(task.status),
+                    }"
+                  />
+                </td>
+                <td class="px-4 py-2 border">
+                  <div
+                    class="flex flex-col space-y-2"
+                    v-for="transition in task.extra.data.transitions"
+                  >
+                    <button
+                      @click="updateStatus(task.id, transition.value)"
+                      class="flex items-center space-x-1 px-2 py-1 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                      :class="{
+                        'bg-green-100 tex t-gray-700 hover:bg-green-200':
+                          transition.color === 'green',
+                        'bg-yellow-100 text-gray-700 hover:bg-yellow-200':
+                          transition.color === 'yellow',
+                      }"
+                    >
+                      <i :class="updateIconClass(transition.value)" aria-hidden="true"></i
+                      ><span>{{ transition.label }}</span>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-4 py-2 border flex items-center space-x-2">
+                  <Button
+                    icon="pi pi-pencil"
+                    severity="warning"
+                    @click="handleEdit(task.id)"
+                    label="Edit"
+                  />
+                  <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    @click="deleteTask(task.id)"
+                    label="Delete"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4">
+            <tailwind-pagination
+              :data="pages"
+              :limit="3"
+              @pagination-change-page="getTasks"
+            />
+          </div>
+        </div>
+        <div v-else>No Tasks Found!</div>
+        <!-- End tasks table -->
+      </div>
     </div>
   </div>
 </template>
@@ -285,21 +303,13 @@ const filteredItems = computed(() => {
     const today = new Date();
     filtered = filtered.filter((task) => {
       const dueDate = new Date(task.due_date);
-      return (
-        dueDate.getFullYear() === today.getFullYear() &&
-        dueDate.getMonth() === today.getMonth() &&
-        dueDate.getDate() < today.getDate()
-      );
+      return dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0);
     });
   } else if (filterDate.value === "due_today") {
     const today = new Date();
     filtered = filtered.filter((task) => {
       const dueDate = new Date(task.due_date);
-      return (
-        dueDate.getFullYear() === today.getFullYear() &&
-        dueDate.getMonth() === today.getMonth() &&
-        dueDate.getDate() === today.getDate()
-      );
+      return dueDate.setHours(0, 0, 0, 0) == today.setHours(0, 0, 0, 0);
     });
   }
   return filtered;
@@ -403,9 +413,9 @@ function getTasks(page = 1) {
 function rootClass(status) {
   return {
     class:
-      status === "green"
+      status === "completed"
         ? "border border-green-500"
-        : status === "yellow"
+        : status === "in_progress"
         ? "border border-orange-500"
         : "border bg-gray-500",
   };
@@ -414,9 +424,9 @@ function rootClass(status) {
 function labelClass(status) {
   return {
     class:
-      status === "green"
+      status === "completed"
         ? "text-green-800 italic"
-        : status === "yellow"
+        : status === "in_progress"
         ? "text-orange-800 italic"
         : "text-gray-800 italic",
   };
@@ -425,18 +435,18 @@ function labelClass(status) {
 function iconStyle(status) {
   return {
     style:
-      status === "green"
+      status === "completed"
         ? "color: green"
-        : status === "yellow"
+        : status === "in_progress"
         ? "color: orange"
         : "color: gray",
   };
 }
 
 const iconClass = function (status) {
-  return status === "green"
+  return status === "completed"
     ? "pi pi-check-circle"
-    : status === "yellow"
+    : status === "in_progress"
     ? "pi pi-cog"
     : "pi pi-clock";
 };
