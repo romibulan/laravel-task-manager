@@ -1,4 +1,5 @@
 import './style.css'
+import "core-js/actual/object/group-by";
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ToastPlugin from 'vue-toast-notification';

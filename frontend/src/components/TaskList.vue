@@ -19,7 +19,20 @@
       <vueSpinner size="30" color="blue" />
     </div>
     <div v-else>
-      <div class="mb-4 flex justify-between items-center">
+      <!-- Task statistics -->
+      <div class="mb-4 flex justify-center gap-8">
+        <div v-for="filterOption in statusFilterOptions" class="flex items-center gap-1">
+          <div class="w-2 h-2 rounded-full bg-gray-800"></div>
+          <label class="text-sm text-gray-500 font-medium"
+            >{{ filterOption.name }} =
+          </label>
+          <span class="text-sm font-bold">{{ totalTasks[filterOption.code] }}</span>
+        </div>
+      </div>
+      <!-- End task statistics -->
+
+      <!-- Task filtering  -->
+      <div class="mb-8 flex justify-between items-center">
         <!-- Search Input -->
         <div class="relative max-w-sm">
           <!-- Search Icon (Optional) -->
@@ -68,7 +81,7 @@
         <!-- end search input >
 
         <!-- Due Date Filter -->
-        <div class="flex flex-wrap gap-6 mb-5">
+        <div class="flex flex-wrap gap-6">
           <span class="text-sm font-medium">Due date: </span>
           <div class="flex items-center">
             <RadioButton v-model="filterDate" inputId="all" value="all" />
@@ -86,32 +99,56 @@
         <!-- end due date filter -->
 
         <!-- Status Filter -->
-        <!-- Filter Checkbox Dropdown -->
-        <MultiSelect
-          v-model="filterStatus"
-          :options="statusFilterOptions"
-          optionLabel="name"
-          optionValue="code"
-          placeholder="Select Status"
-          :maxSelectedLabels="3"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-sm font-medium">Status: </span>
+
+          <MultiSelect
+            v-model="filterStatus"
+            :options="statusFilterOptions"
+            optionLabel="name"
+            optionValue="code"
+            placeholder="Select Status"
+            :maxSelectedLabels="3"
+          />
+        </div>
         <!-- end status filter -->
       </div>
+      <!-- End task filtering -->
+
       <div class="mb-4 flex justify-between items-center">
         <span class="text-sm font-medium"
           >Showing {{ filteredItems.length }} of {{ tasks.length }} tasks</span
         >
-        <div v-if="filterStatus.length > 0" class="ml-12 flex items-center space-x-2">
+        <!-- Filters used -->
+
+        <div v-if="filterStatus.length > 0" class="flex items-center space-x-4">
           <span class="text-sm font-medium">Status: </span>
-          <div v-for="filter in filterStatus" :key="filter">
-            <Chip
-              :label="statusFilterOptions.find((option) => option.code === filter)?.name"
-              :icon="iconClass(filter)"
-              removable
-              @remove="filterStatus = filterStatus.filter((f) => f !== filter)"
-            />
+          <div v-for="filter in statusFilterOptions" :key="filter.code">
+            <div class="relative">
+              <Chip
+                :pt="{
+                  root: rootClass(filter.code),
+                  label: labelClass(filter.code),
+                  icon: iconStyle(filter.code),
+                }"
+                :label="filter.name"
+                :icon="iconClass(filter.code)"
+                removable
+                @remove="filterStatus = filterStatus.filter((f) => f !== filter.code)"
+              />
+              <div class="absolute -top-3 -right-2 z-10">
+                <Badge
+                  :value="totalTasks[filter]?.length || 0"
+                  severity="info"
+                  size="small"
+                />
+              </div>
+            </div>
           </div>
         </div>
+        <!-- End filters used -->
+
+        <!-- Add new task -->
         <div class="flex items-center gap-4">
           <Button @click="showDialog()" label="New Task" icon="pi pi-plus" />
           <Button
@@ -121,7 +158,9 @@
             severity="secondary"
           />
         </div>
+        <!-- End new task -->
       </div>
+
       <div class="overflow-x-auto">
         <!-- Tasks Table -->
         <div v-if="filteredItems.length > 0">
@@ -212,6 +251,8 @@
 </template>
 
 <script setup>
+import { ref, onMounted, computed, watch } from "vue";
+
 import { VueSpinner } from "vue3-spinners";
 import { useToast } from "vue-toast-notification";
 import { TailwindPagination } from "laravel-vue-pagination";
@@ -219,9 +260,9 @@ import Button from "PrimeVue/Button";
 import MultiSelect from "primevue/multiselect";
 import RadioButton from "primevue/radiobutton";
 import Chip from "primevue/chip";
+import Badge from "primevue/badge";
 import { format, parse } from "@formkit/tempo";
 
-import { ref, onMounted, computed, watch } from "vue";
 import http from "../utils/http";
 import TaskForm from "./TaskForm.vue";
 // import Button from "../components/Button.vue";
@@ -229,6 +270,8 @@ import TaskForm from "./TaskForm.vue";
 const $toast = useToast();
 
 const tasks = ref([]);
+
+const totalTasks = ref(0);
 
 const taskToEdit = ref({});
 
@@ -315,6 +358,10 @@ const filteredItems = computed(() => {
   return filtered;
 });
 
+const filteredItemsGrouped = computed(() => {
+  return Object.groupBy(filteredItems.value, (task) => task.status);
+});
+
 function handleEdit(taskID) {
   const task = http.get(`/tasks/${taskID}`).then((response) => {
     if (response.data?.data) {
@@ -392,9 +439,10 @@ function getTasks(page = 1) {
   http
     .get(`/tasks?page=${page}`)
     .then((response) => {
-      if (response.data?.data) {
+      if (response?.data?.data) {
         tasks.value = response.data?.data;
         pages.value = response.data;
+        totalTasks.value = response.data.count;
       }
     })
     .catch((error) => {
@@ -417,7 +465,7 @@ function rootClass(status) {
         ? "border border-green-500"
         : status === "in_progress"
         ? "border border-orange-500"
-        : "border bg-gray-500",
+        : "border border-gray-500",
   };
 }
 
