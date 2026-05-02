@@ -22,7 +22,11 @@
       <!-- Task statistics -->
       <div class="mb-4 flex justify-center gap-8">
         <div v-for="filterOption in statusFilterOptions" class="flex items-center gap-1">
-          <div class="w-2 h-2 rounded-full bg-gray-800"></div>
+          <Badge
+            :value="totalTasks[filterOption.code] || 0"
+            :severity="badgeClass(filterOption.code)"
+            size="small"
+          />
           <label class="text-sm text-gray-500 font-medium"
             >{{ filterOption.name }} =
           </label>
@@ -123,23 +127,23 @@
 
         <div v-if="filterStatus.length > 0" class="flex items-center space-x-4">
           <span class="text-sm font-medium">Status: </span>
-          <div v-for="filter in statusFilterOptions" :key="filter.code">
+          <div v-for="filter in filterStatus" :key="filter">
             <div class="relative">
               <Chip
                 :pt="{
-                  root: rootClass(filter.code),
-                  label: labelClass(filter.code),
-                  icon: iconStyle(filter.code),
+                  root: rootClass(filter),
+                  label: labelClass(filter),
+                  icon: iconStyle(filter),
                 }"
-                :label="filter.name"
-                :icon="iconClass(filter.code)"
+                :label="filteredItemsGrouped[filter]?.[0]?.extra?.data?.label || filter"
+                :icon="iconClass(filter)"
                 removable
-                @remove="filterStatus = filterStatus.filter((f) => f !== filter.code)"
+                @remove="filterStatus = filterStatus.filter((f) => f !== filter)"
               />
               <div class="absolute -top-3 -right-2 z-10">
                 <Badge
-                  :value="totalTasks[filter]?.length || 0"
-                  severity="info"
+                  :value="filteredItemsGrouped[filter]?.length || 0"
+                  :severity="badgeClass(filter)"
                   size="small"
                 />
               </div>
@@ -497,6 +501,14 @@ const iconClass = function (status) {
     : status === "in_progress"
     ? "pi pi-cog"
     : "pi pi-clock";
+};
+
+const badgeClass = function (status) {
+  return status === "completed"
+    ? "success"
+    : status === "in_progress"
+    ? "warn"
+    : "secondary";
 };
 
 function updateIconClass(status) {
