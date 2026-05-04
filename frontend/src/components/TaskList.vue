@@ -16,21 +16,38 @@
       v-if="isLoading"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-10 backdrop-blur-sm"
     >
-      <vueSpinner size="30" color="blue" />
+      <vueSpinner size="30" color="#10b981" />
     </div>
     <div v-else>
       <!-- Task statistics -->
-      <div class="mb-4 flex justify-center gap-8">
-        <div v-for="filterOption in statusFilterOptions" class="flex items-center gap-1">
-          <Badge
-            :value="totalTasks[filterOption.code] || 0"
-            :severity="badgeClass(filterOption.code)"
-            size="small"
-          />
-          <label class="text-sm text-gray-500 font-medium"
-            >{{ filterOption.name }} =
-          </label>
-          <span class="text-sm font-bold">{{ totalTasks[filterOption.code] }}</span>
+      <div class="mb-6 flex space-x-6">
+        <div
+          v-for="option in statusFilterOptions"
+          :key="option.key"
+          class="flex items-center space-x-2"
+        >
+          <div class="relative">
+            <Chip
+              :label="
+                taskStats[option.code]
+                  ? `${option.name} (${taskStats[option.code]})`
+                  : `${option.name} (0)`
+              "
+              :icon="iconClass(option.code)"
+              :pt="{
+                root: rootClass(option.code),
+                label: labelClass(option.code),
+                icon: iconStyle(option.code),
+              }"
+            />
+            <div class="absolute -top-3 -right-2 z-10">
+              <Badge
+                :value="taskStats[option.code] || 0"
+                :severity="badgeClass(option.code)"
+                size="small"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <!-- End task statistics -->
@@ -275,7 +292,11 @@ const $toast = useToast();
 
 const tasks = ref([]);
 
-const totalTasks = ref(0);
+const filteredTasks = ref([]);
+
+const totalTasks = ref({});
+
+const taskStats = ref({});
 
 const taskToEdit = ref({});
 
@@ -327,39 +348,46 @@ const highlightRow = (taskId, color) => {
   }, 5000);
 };
 
+watch([filterStatus, filterDate, searchQuery], () => {
+  isLoading.value = true;
+  let data = {
+    status: filterStatus.value,
+    due_date: filterDate.value,
+    q: searchQuery.value,
+  };
+  console.log("filtering with data:", data);
+  http
+    .get("/tasks", { params: data })
+    .then((response) => {
+      if (response?.data?.data) {
+        let filtered = response.data.data;
+        filtered = filtered.map((task) => ({
+          ...task,
+          due_date: format(parse(task.due_date), "long"),
+        }));
+        filteredTasks.value = filtered;
+        isLoading.value = false;
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 const filteredItems = computed(() => {
-  console.log("filtering tasks based on status:", filterStatus.value.length);
-  let filtered = tasks.value
-    .map((task) => ({
-      ...task,
-      due_date: format(parse(task.due_date), "long"),
-    }))
-    .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-
-  if (filterStatus.value.length > 0) {
-    filtered = filtered.filter((task) => filterStatus.value.includes(task.status));
+  let filtered = tasks.value.map((task) => ({
+    ...task,
+    due_date: format(parse(task.due_date), "long"),
+  }));
+  if (
+    filterStatus.value.length > 0 ||
+    filterDate.value !== "all" ||
+    searchQuery.value.trim() !== ""
+  ) {
+    return filteredTasks.value;
+  } else {
+    return filtered;
   }
-
-  if (searchQuery.value.trim() !== "") {
-    filtered = filtered.filter((task) =>
-      task.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
-
-  if (filterDate.value === "past_due") {
-    const today = new Date();
-    filtered = filtered.filter((task) => {
-      const dueDate = new Date(task.due_date);
-      return dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0);
-    });
-  } else if (filterDate.value === "due_today") {
-    const today = new Date();
-    filtered = filtered.filter((task) => {
-      const dueDate = new Date(task.due_date);
-      return dueDate.setHours(0, 0, 0, 0) == today.setHours(0, 0, 0, 0);
-    });
-  }
-  return filtered;
 });
 
 const filteredItemsGrouped = computed(() => {
@@ -447,6 +475,7 @@ function getTasks(page = 1) {
         tasks.value = response.data?.data;
         pages.value = response.data;
         totalTasks.value = response.data.count;
+        taskStats.value = response.data.stats;
       }
     })
     .catch((error) => {

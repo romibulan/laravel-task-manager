@@ -19,10 +19,25 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-
+        //return;
         $tasks = Task::with('owner:id,name,email')
+            ->when($request->filled('status'), function ($q) use ($request) {
+                return $q->whereIn('status', $request->status);
+            })
+            ->when($request->filled('due_date'), function ($q) use ($request) {
+                if ($request->due_date === 'past_due') {
+                    return  $q->whereDate('due_date', '<', now());
+                } else if ($request->due_date === 'due_today') {
+                    return  $q->whereDate('due_date', '=',  now());
+                } else {
+                    return $q;
+                }
+            })
+            ->when($request->filled('q'), function ($q) use ($request) {
+                return $q->where('title', 'like', "%" . $request->q . "%");
+            })
             // ->orderByRaw("CASE WHEN status = ? THEN 0 WHEN status = ? THEN 1 WHEN status = ? THEN 2 END", [TaskStatus::Pending->value, TaskStatus::InProgress->value, TaskStatus::Completed->value])
             ->orderBy('due_date', 'asc')
             ->paginate(10)
@@ -32,7 +47,11 @@ class TaskController extends Controller
                 return $task;
             });
 
-        return new TaskCollection($tasks);
+        $stats = Task::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        return new TaskCollection($tasks, 200, ['stats' => $stats]);
     }
 
     /**
