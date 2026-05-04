@@ -20,34 +20,40 @@
     </div>
     <div v-else>
       <!-- Task statistics -->
-      <div class="mb-6 flex space-x-6">
-        <div
-          v-for="option in statusFilterOptions"
-          :key="option.key"
-          class="flex items-center space-x-2"
-        >
-          <div class="relative">
-            <Chip
-              :label="
-                taskStats[option.code]
-                  ? `${option.name} (${taskStats[option.code]})`
-                  : `${option.name} (0)`
-              "
-              :icon="iconClass(option.code)"
-              :pt="{
-                root: rootClass(option.code),
-                label: labelClass(option.code),
-                icon: iconStyle(option.code),
-              }"
-            />
-            <div class="absolute -top-3 -right-2 z-10">
-              <Badge
-                :value="taskStats[option.code] || 0"
-                :severity="badgeClass(option.code)"
-                size="small"
+      <div class="mb-6 flex justify-between items-center">
+        <div class="flex space-x-6">
+          <div
+            v-for="option in statusFilterOptions"
+            :key="option.key"
+            class="flex items-center space-x-2"
+          >
+            <div class="relative">
+              <Chip
+                :label="
+                  taskStats[option.code]
+                    ? `${option.name} (${taskStats[option.code]})`
+                    : `${option.name} (0)`
+                "
+                :icon="iconClass(option.code)"
+                :pt="{
+                  root: rootClass(option.code),
+                  label: labelClass(option.code),
+                  icon: iconStyle(option.code),
+                }"
               />
+              <div class="absolute -top-3 -right-2 z-10">
+                <Badge
+                  :value="taskStats[option.code] || 0"
+                  :severity="badgeClass(option.code)"
+                  size="small"
+                />
+              </div>
             </div>
           </div>
+        </div>
+        <div class="text-2xl font-medium text-gray-600">
+          Total Tasks:
+          {{ Object.values(taskStats).reduce((sum, count) => sum + count, 0) }}
         </div>
       </div>
       <!-- End task statistics -->
