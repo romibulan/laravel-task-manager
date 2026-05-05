@@ -283,7 +283,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { VueSpinner } from "vue3-spinners";
 import { useToast } from "vue-toast-notification";
 import { TailwindPagination } from "laravel-vue-pagination";
-import Button from "PrimeVue/Button";
+import Button from "primeVue/button";
 import MultiSelect from "primevue/multiselect";
 import RadioButton from "primevue/radiobutton";
 import Chip from "primevue/chip";
