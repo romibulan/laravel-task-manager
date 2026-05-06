@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import Button from "PrimeVue/Button";
+import Button from "primeVue/button";
 import Dialog from "primevue/dialog";
 
 import { ref, watch, computed } from "vue";
