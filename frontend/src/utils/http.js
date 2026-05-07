@@ -2,7 +2,7 @@ import axios from 'axios';
 import router from "../router";
 import { useHttpConfig } from '@/utils/library.js';
 
-axios.defaults.baseURL = 'http://localhost:8000/api'; // Set your backend URL here
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL; // Set your backend URL here
 axios.defaults.withCredentials = true; // Required for sending cookies
 axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
