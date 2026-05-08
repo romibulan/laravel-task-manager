@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173,https://taskmanagevue.netlify.app'],
+    'allowed_origins' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', '')),
 
     'allowed_origins_patterns' => [],
 
