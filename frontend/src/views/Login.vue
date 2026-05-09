@@ -132,6 +132,7 @@ async function login() {
   clearErrors();
   showLoader();
   await http.get("/sanctum/csrf-cookie");
+  console.log("CSRF cookie set, proceeding with login...");
   http
     .post("/login", user)
     .then((response) => {
