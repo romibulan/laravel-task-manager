@@ -10,6 +10,7 @@ axios.interceptors.request.use(config => {
   console.log('Request URL:', config.url);
 
   if (config.url === '/sanctum/csrf-cookie') {
+    console.log('config.url:', config.url);
     console.log('Setting baseURL for Sanctum CSRF request');
     const newBase = import.meta.env.VITE_SANCTUM_URL;
     // Ensure the URL is not already absolute before prepending
