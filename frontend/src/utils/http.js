@@ -13,7 +13,7 @@ axios.interceptors.request.use(config => {
     console.log('Setting baseURL for Sanctum CSRF request');
     const newBase = import.meta.env.VITE_SANCTUM_URL;
     // Ensure the URL is not already absolute before prepending
-    if (!config.url.startsWith('http')) {
+    if (!config.url.startsWith('http') || !config.url.startsWith('https')) {
       config.url = `${newBase}${config.url}`;
     }
   }
