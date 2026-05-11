@@ -8,7 +8,9 @@
           activity.
         </p>
       </div>
+      <div v-if="isLoggedIn">
       <TaskList />
+      </div>
     </AppLayout>
   </div>
 </template>
@@ -18,11 +20,11 @@ import AppLayout from "../layouts/AppLayout.vue";
 import TaskList from "../components/TaskList.vue";
 import http from "../utils/http";
 import router from "../router";
-import { ref, onMounted, inject } from "vue";
+import { ref, onBeforeMount , inject } from "vue";
 
 const { isLoggedIn, layoutData, updateLayoutData } = inject("layoutState");
 
-onMounted(() => {
+onBeforeMount(() => {
   if (!isLoggedIn.value) {
     router.push("/login");
   }
