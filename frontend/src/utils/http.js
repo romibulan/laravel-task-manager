@@ -19,9 +19,9 @@ axios.interceptors.request.use(config => {
     const newBase = '';
 
     // Ensure the URL is not already absolute before prepending
-    if (!config.url.startsWith('http') || !config.url.startsWith('https')) {
-      config.url = `${newBase}${config.url}`;
-    }
+    //if (!config.url.startsWith('http') || !config.url.startsWith('https')) {
+    config.url = `${newBase}${config.url}`;
+    //}
   }
   return config;
 }, error => {
