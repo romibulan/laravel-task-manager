@@ -20,7 +20,8 @@ axios.interceptors.request.use(config => {
 
     // Ensure the URL is not already absolute before prepending
     //if (!config.url.startsWith('http') || !config.url.startsWith('https')) {
-    config.url = `${newBase}${config.url}`;
+    //config.url = `${newBase}${config.url}`;
+    axios.defaults.baseURL = newBase; // Reset baseURL to default for subsequent requests
     //}
   }
   return config;
