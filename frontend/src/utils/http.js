@@ -1,8 +1,8 @@
 import axios from 'axios';
 import router from "../router";
 import { useHttpConfig } from '@/utils/library.js';
-const baseUrl = "/api"; //import.meta.env.VITE_API_BASE_URL;
-axios.defaults.baseURL = baseUrl; // Set your backend URL here
+// const baseUrl = "/api"; //import.meta.env.VITE_API_BASE_URL;
+// axios.defaults.baseURL = baseUrl; // Set your backend URL here
 axios.defaults.withCredentials = true; // Required for sending cookies
 axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -17,6 +17,12 @@ axios.interceptors.request.use(config => {
     axios.defaults.baseURL = newBase;
     if (!config.url.startsWith('http')) {
       config.url = `${newBase}${config.url}`;
+    }
+  } else {
+    const baseUrl = "/api"; //import.meta.env.VITE_API_BASE_URL;
+    axios.defaults.baseURL = baseUrl; // Set your backend URL here
+    if (!config.url.startsWith('http')) {
+      config.url = `${baseUrl}${config.url}`;
     }
   }
   return config;
