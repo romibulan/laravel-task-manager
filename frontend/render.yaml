@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: taskmanager
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://sumantra.kesug.com/api/*
+
+      - type: rewrite
+        source: /sanctum/*
+        destination: https://sumantra.kesug.com/sanctum/*
