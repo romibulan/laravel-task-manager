@@ -1,27 +1,27 @@
 import axios from 'axios';
 import router from "../router";
 import { useHttpConfig } from '@/utils/library.js';
-const baseUrl = ""; //import.meta.env.VITE_API_BASE_URL;
+const baseUrl = "/api"; //import.meta.env.VITE_API_BASE_URL;
 axios.defaults.baseURL = baseUrl; // Set your backend URL here
 axios.defaults.withCredentials = true; // Required for sending cookies
 axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-// axios.interceptors.request.use(config => {
-//   console.log('Request URL:', config.url);
+axios.interceptors.request.use(config => {
+  console.log('Request URL:', config.url);
 
-//   if (config.url === '/sanctum/csrf-cookie') {
-//     console.log('config.url:', config.url);
-//     console.log('Setting baseURL for Sanctum CSRF request');
-//     const newBase = import.meta.env.VITE_SANCTUM_URL;
-//     // Ensure the URL is not already absolute before prepending
-//     if (!config.url.startsWith('http') || !config.url.startsWith('https')) {
-//       config.url = `${newBase}${config.url}`;
-//     }
-//   }
-//   return config;
-// }, error => {
-//   return Promise.reject(error);
-// });
+  if (config.url === '/sanctum/csrf-cookie') {
+    console.log('config.url:', config.url);
+    console.log('Setting baseURL for Sanctum CSRF request');
+    const newBase = ""; //import.meta.env.VITE_SANCTUM_URL;
+    // Ensure the URL is not already absolute before prepending
+    if (!config.url.startsWith('http')) {
+      config.url = `${newBase}${config.url}`;
+    }
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
 
 axios.interceptors.response.use(
   response => response,
