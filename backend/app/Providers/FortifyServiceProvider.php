@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -37,12 +38,16 @@ class FortifyServiceProvider extends ServiceProvider
                     ? response()->json(['success' => true, 'message' => "You have Successfully Registered"], 201)
                     : redirect(config('fortify.home'));
             }
-        }); 
+        });
 
         $this->app->instance(LoginResponse::class, new class implements LoginResponse
         {
             public function toResponse($request)
             {
+
+                $referer = request()->headers->get('referer');
+                $originDomain = parse_url($referer, PHP_URL_HOST);
+                Log::info("Login request from: " . $originDomain);
                 return $request->wantsJson()
                     ? response()->json(['success' => true, 'message' => "Logged In successfully"], 200)
                     : redirect(config('fortify.home'));
