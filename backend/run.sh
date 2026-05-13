@@ -10,5 +10,5 @@ php artisan view:cache
 
 echo "Running migrations..."
 # --force is required in production
-php artisan migrate --force
+php artisan migrate:fresh --force
 
