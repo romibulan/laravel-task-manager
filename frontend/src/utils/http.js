@@ -6,6 +6,7 @@ import { useHttpConfig } from '@/utils/library.js';
 axios.defaults.withCredentials = true; // Required for sending cookies
 axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.headers.common['Accept'] = "application/json";
 axios.interceptors.request.use(config => {
   console.log('Request URL:', config.url);
 
