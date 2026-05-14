@@ -4,7 +4,9 @@ import { useHttpConfig } from '@/utils/library.js';
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 axios.defaults.baseURL = baseUrl; // Set your backend URL here
 axios.defaults.withCredentials = true; // Required for sending cookies
-axios.defaults.withXSRFToken = true;    // Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
+axios.defaults.xsrfCookieName = "XSRF-TOKEN";
+axios.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+// Newer Axios versions (1.6+) require this to send the X-XSRF-TOKEN header
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.common['Accept'] = "application/json";
 axios.interceptors.request.use(config => {
