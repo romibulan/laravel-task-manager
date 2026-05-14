@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'https://taskmanagevue.netlify.app', 'http://sumantra.10001mb.com'],
+    'allowed_origins' => ['http://localhost:5173', 'https://taskmanagevue.netlify.app', 'https://taskmanager-tzmk.onrender.com'],
 
     'allowed_origins_patterns' => [],
 
