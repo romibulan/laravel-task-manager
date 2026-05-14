@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(HandleCors::class);
         $middleware->statefulApi();
+        $middleware->validateCsrfTokens(
+            except: [
+                '/api/login', // Disables CSRF for Fortify's default login route
+            ]
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
