@@ -48,9 +48,11 @@ class FortifyServiceProvider extends ServiceProvider
                 $referer = request()->headers->get('referer');
                 $originDomain = parse_url($referer, PHP_URL_HOST);
                 Log::info("Login request from: " . $originDomain);
-                return $request->wantsJson()
-                    ? response()->json(['success' => true, 'message' => "Logged In successfully"], 200)
-                    : redirect(config('fortify.home'));
+                return
+                    //$request->wantsJson()
+                    //   ?
+                    response()->json(['success' => true, 'message' => "Logged In successfully"], 200);
+                //   : redirect(config('fortify.home'));
             }
         });
 
