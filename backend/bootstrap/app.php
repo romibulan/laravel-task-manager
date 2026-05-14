@@ -17,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
         $middleware->validateCsrfTokens(
             except: [
-                '/api/login', // Disables CSRF for Fortify's default login route
+                '/api/login',
+                '/api/register', // Disables CSRF for Fortify's default login route
             ]
         );
     })
