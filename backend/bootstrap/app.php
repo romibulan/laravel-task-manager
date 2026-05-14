@@ -18,10 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(
             except: [
                 '/api/login',
-                '/api/register', // Disables CSRF for Fortify's default login route
+                '/api/register',
+                '/api/tasks',
             ]
         );
-        $middleware->trustProxies(at: '*');
+        $middleware->trustProxies('*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
