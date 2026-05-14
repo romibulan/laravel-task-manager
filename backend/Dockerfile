@@ -1,30 +1,20 @@
-# Use a production-ready image with PHP and Nginx
-FROM webdevops/php-nginx:8.2
+FROM richarvey/nginx-php-fpm:3.1.6
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip git unzip
-
-# Copy application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-# Copy configuration files
-COPY nginx.conf /etc/nginx/vhost.conf
-COPY run.sh /usr/local/bin/run.sh
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Make the startup script executable
-RUN chmod +x /usr/local/bin/run.sh
-
-# Expose port (Render uses 80 by default for web services)
-EXPOSE 80
-
-# Use the shell script for startup
-ENTRYPOINT ["/usr/local/bin/run.sh"]
+CMD ["/start.sh"]
