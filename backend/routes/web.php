@@ -8,9 +8,9 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function (Request $request) {
-    return auth()->check() && $request->wantsJson() ?
-        response()->json(['status' => 'authenticated', 'message' => 'Already authenticated']) :
-        redirect()->away('http://localhost:5173/dashboard');
+    return auth()->check() ?
+        response()->json(['status' => 'authenticated', 'message' => 'Already authenticated'], 200) :
+        redirect()->away('https://taskmanager-tzmk.onrender.com/login');
 });
 
 Route::get('/session-check', function () {
