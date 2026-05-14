@@ -15,8 +15,8 @@ Route::get('/home', function (Request $request) {
 
 Route::get('/session-check', function () {
     if (!session()->has('test')) {
+        session(['test' => 'working']);
         return 'Session variable "test" is not set.';
     }
-    session(['test' => 'working']);
     return session('test');
 });
