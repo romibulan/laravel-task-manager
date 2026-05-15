@@ -47,11 +47,7 @@ class TaskController extends Controller
                 return $task;
             });
 
-        $stats = Task::selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status');
-
-        return new TaskCollection($tasks, 200, ['stats' => $stats]);
+        return new TaskCollection($tasks);
     }
 
     /**

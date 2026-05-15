@@ -421,9 +421,11 @@ function handleTaskCreateOrUpdate(task = null) {
     }
     hideDialog();
     highlightRow(task.id, task.extra.data.color);
-  } else {
-    getTasks();
   }
+  // else {
+  //   getTasks();
+  // }
+  getTaskStats();
 }
 
 function updateStatus(taskId, newStatus) {
@@ -450,6 +452,7 @@ function updateStatus(taskId, newStatus) {
       $toast.error("could'nt update task, Something went wrong");
       // }
     });
+  getTaskStats();
 }
 
 const deleteTask = (taskId) => {
@@ -468,12 +471,30 @@ const deleteTask = (taskId) => {
         $toast.error("could'nt delete task, Something went wrong");
         // }
       });
+  getTaskStats();
 };
 
 getTasks();
 
+function getTaskStats() {
+  http
+    .get("/task-stats")
+    .then((response) => {
+      if (response?.data?.data) {
+        taskStats.value = response.data?.data;
+      }
+    })
+    .catch((error) => {
+      console.error(
+        "Task statistics fetching failed:",
+        error.response.message || "Internal Server Error"
+      );
+    });
+}
+
 function getTasks(page = 1) {
   showLoader();
+  getTaskStats();
   http
     .get(`/tasks?page=${page}`)
     .then((response) => {
@@ -481,7 +502,6 @@ function getTasks(page = 1) {
         tasks.value = response.data?.data;
         pages.value = response.data;
         totalTasks.value = response.data.count;
-        taskStats.value = response.data.stats;
       }
     })
     .catch((error) => {

@@ -13,6 +13,6 @@ Route::get('/home', function (Request $request) {
             response()->json(['status' => 'authenticated', 'message' => 'Already authenticated'], 200)
             : redirect()->away(env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard');
     } else {
-        redirect()->away(env('FRONTEND_URL', 'http://localhost:3000') . '/login');
+        redirect()->away(env('FRONTEND_URL', 'http://localhost:5173') . '/login');
     }
 });
