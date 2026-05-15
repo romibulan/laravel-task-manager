@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             except: [
                 '/api/login',
                 '/api/register',
-                '/api/tasks',
+                '/api/tasks', '/api/tasks/*',
             ]
         );
         $middleware->trustProxies('*');
