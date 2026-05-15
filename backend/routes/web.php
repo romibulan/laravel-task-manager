@@ -8,15 +8,7 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function (Request $request) {
-    return auth()->check() ?
-        response()->json(['status' => 'authenticated', 'message' => 'Already authenticated'], 200) :
-        redirect()->away('https://taskmanager-tzmk.onrender.com/login');
-});
-
-Route::get('/session-check', function () {
-    if (!session()->has('test')) {
-        session(['test' => 'working']);
-        return 'Session variable "test" is not set.';
-    }
-    return session('test');
+    return auth()->check() && $request->wantsJson() ?
+        response()->json(['status' => 'authenticated', 'message' => 'Already authenticated'], 200)
+        : redirect()->away(env('FRONTEND_URL', 'http://localhost:3000') . '/login');
 });
