@@ -358,16 +358,17 @@ const highlightRow = (taskId, color) => {
 
 watchDebounced(
   searchQuery,
-  () => {
-    console.log("search debounce query changed:", searchQuery.value);
-    isLoading.value = true;
-    let data = {
-      status: filterStatus.value,
-      due_date: filterDate.value,
-      q: searchQuery.value,
-    };
-    console.log("filtering with data:", data);
-    search(data);
+  (newQuery) => {
+    if (newQuery) {
+      isLoading.value = true;
+      let data = {
+        status: filterStatus.value,
+        due_date: filterDate.value,
+        q: searchQuery.value,
+      };
+      console.log("filtering with data:", data);
+      search(data);
+    }
   },
   { debounce: 3000, maxWait: 4000 }
 );

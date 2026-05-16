@@ -28,4 +28,10 @@ return new class extends Migration
     {
         Schema::dropIfExists('sessions');
     }
+
+    public function shouldRun(): bool
+    {
+        // Skip this migration if the 'flights' table already exists
+        return !Schema::hasTable('sessions');
+    }
 };

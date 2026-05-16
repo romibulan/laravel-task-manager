@@ -22,7 +22,7 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         //return;
-        $tasks = Task::with('owner:id,name,email')
+        $query = Task::with('owner:id,name,email')
             ->when($request->filled('status'), function ($q) use ($request) {
                 return $q->whereIn('status', $request->status);
             })
@@ -36,16 +36,20 @@ class TaskController extends Controller
                 }
             })
             ->when($request->filled('q'), function ($q) use ($request) {
-                return $q->where('title', 'like', "%" . $request->q . "%")
-                    ->orWhere('description', 'like', "%" . $request->q . "%")
-                    ->orWhereHas('owner', function ($q) use ($request) {
-                        $q->where('name', 'like', "%" . $request->q . "%")
-                            ->orWhere('email', 'like', "%" . $request->q . "%");
-                    });
+                return $q->where(function ($q) use ($request) {
+                    $q->where('title', 'like', "%" . $request->q . "%")
+                        ->orWhere('description', 'like', "%" . $request->q . "%")
+                        ->orWhereHas('owner', function ($q) use ($request) {
+                            $q->where('name', 'like', "%" . $request->q . "%")
+                                ->orWhere('email', 'like', "%" . $request->q . "%");
+                        });
+                });
             })
             // ->orderByRaw("CASE WHEN status = ? THEN 0 WHEN status = ? THEN 1 WHEN status = ? THEN 2 END", [TaskStatus::Pending->value, TaskStatus::InProgress->value, TaskStatus::Completed->value])
-            ->orderBy('due_date', 'asc')
-            ->paginate(10)
+            ->orderBy('due_date', 'asc');
+        // $sql = $query->toRawSql();
+        // return $sql;
+        $tasks = $query->paginate(10)
             ->getCollection()
             ->transform(function ($task) {
                 $task->append('transitions');
