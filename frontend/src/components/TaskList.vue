@@ -105,7 +105,7 @@
             </svg>
           </button>
         </div>
-        <!-- end search input >
+        <!-- end search input -->
 
         <!-- Due Date Filter -->
         <div class="flex flex-wrap gap-6">
@@ -228,7 +228,8 @@
                 <td class="px-4 py-2 border">
                   <div
                     class="flex flex-col space-y-2"
-                    v-for="transition in task.extra.data.transitions"
+                    v-for="(transition, index) in task.extra.data.transitions"
+                    :key="`${task.id}-${index}`"
                   >
                     <button
                       @click="updateStatus(task.id, transition.value)"
@@ -278,7 +279,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { VueSpinner } from "vue3-spinners";
 import { useToast } from "vue-toast-notification";
@@ -401,7 +402,7 @@ const filteredItemsGrouped = computed(() => {
 });
 
 function handleEdit(taskID) {
-  const task = http.get(`/tasks/${taskID}`).then((response) => {
+  http.get(`/tasks/${taskID}`).then((response) => {
     if (response.data?.data) {
       taskToEdit.value = response.data?.data;
       showDialog();
