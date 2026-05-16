@@ -16,7 +16,10 @@
       v-if="isLoading"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-10 backdrop-blur-sm"
     >
-      <vueSpinner size="30" color="#10b981" />
+      <div class="flex flex-col items-center justify-center space-y-2">
+        <vueSpinner size="40" color="#10b981" />
+        <div class="text-xl font-semibold">Loading...</div>
+      </div>
     </div>
     <div v-else>
       <!-- Task statistics -->
