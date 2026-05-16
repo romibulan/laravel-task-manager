@@ -280,6 +280,7 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import { watchDebounced } from "@vueuse/core";
 
 import { VueSpinner } from "vue3-spinners";
 import { useToast } from "vue-toast-notification";
@@ -355,7 +356,22 @@ const highlightRow = (taskId, color) => {
   }, 5000);
 };
 
-watch([filterStatus, filterDate, searchQuery], () => {
+watchDebounced(
+  searchQuery,
+  () => {
+    isLoading.value = true;
+    let data = {
+      status: filterStatus.value,
+      due_date: filterDate.value,
+      q: searchQuery.value,
+    };
+    console.log("filtering with data:", data);
+    search(data);
+  },
+  { debounce: 500, maxWait: 1000 }
+);
+
+watch([filterStatus, filterDate], () => {
   isLoading.value = true;
   let data = {
     status: filterStatus.value,
@@ -363,6 +379,10 @@ watch([filterStatus, filterDate, searchQuery], () => {
     q: searchQuery.value,
   };
   console.log("filtering with data:", data);
+  search(data);
+});
+
+function search(data) {
   http
     .get("/tasks", { params: data })
     .then((response) => {
@@ -379,7 +399,7 @@ watch([filterStatus, filterDate, searchQuery], () => {
     .catch((error) => {
       console.log(error);
     });
-});
+}
 
 const filteredItems = computed(() => {
   let filtered = tasks.value.map((task) => ({
